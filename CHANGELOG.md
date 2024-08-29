@@ -22,6 +22,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added devcontainer support. It was tested with VS Codium on Fedora/Podman and Ubuntu/Docker, but should work for any platform that supports devcontainers
   - Added Justfile for common tasks. E.g. run `just ci` for a full check, similar to what we do in CI (do it before sending PR!)
 
+- Support for TBA 7.3 ([#1159](pr1159))
+  - Add `filter_chat_background_set` to `MessageFilterExt` trait
+
+[pr1159]: https://github.com/teloxide/teloxide/pull/1159
+
 ### Changed
 
 - Environment bumps: ([PR 1147](https://github.com/teloxide/teloxide/pull/1147), [PR 1225](https://github.com/teloxide/teloxide/pull/1225))
