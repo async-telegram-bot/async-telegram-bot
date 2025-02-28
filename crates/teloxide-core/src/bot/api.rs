@@ -6,9 +6,7 @@ use crate::{
     requests::{JsonRequest, MultipartRequest},
     types::{
         BotCommand, BusinessConnectionId, CallbackQueryId, ChatId, ChatPermissions,
-        InlineQueryResult, InputFile, InputMedia, InputSticker, LabeledPrice, MessageId, Recipient,
-        BotCommand, BusinessConnectionId, CallbackQueryId, ChatId, ChatPermissions, 
-        InlineQueryResult, InputFile, InputMedia, InputPollOption, InputSticker, LabeledPrice, 
+        InlineQueryResult, InputFile, InputMedia, InputPollOption, InputSticker, LabeledPrice,
         MessageId, Recipient, Rgb, StickerFormat, ThreadId, UserId,
     },
     Bot,

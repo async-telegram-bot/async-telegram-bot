@@ -1500,6 +1500,8 @@ macro_rules! requester_forward {
     };// END BLOCK requester_forward_at_method
 }
 
+// Codegen and rustfmt kept fighting, which formatting is better
+#[rustfmt::skip]
 macro_rules! TelegramStringId {
     (#[doc = $doc:expr] $struct_name:ident) => {
         use bytemuck::{TransparentWrapper, TransparentWrapperAlloc};
@@ -1527,27 +1529,25 @@ macro_rules! TelegramStringId {
         }
 
         impl $struct_name {
-            fn from_str(s: &str) -> Box<Self> {
-                $struct_name::wrap_box(Box::<str>::from(s))
-            }
+            fn from_str(s: &str) -> Box<Self> { $struct_name::wrap_box(Box::<str>::from(s)) }
         }
 
         impl From<String> for Box<$struct_name> {
-            fn from(value: String) -> Box<$struct_name> {
-                $struct_name::from_str(&value)
-            }
+            fn from(value: String) -> Box<$struct_name> { $struct_name::from_str(&value) }
         }
 
         impl From<&str> for Box<$struct_name> {
-            fn from(value: &str) -> Self {
-                $struct_name::from_str(value)
-            }
+            fn from(value: &str) -> Self { $struct_name::from_str(value) }
         }
 
         impl From<Box<$struct_name>> for String {
             fn from(value: Box<$struct_name>) -> String {
                 $struct_name::peel_box(value).to_string()
             }
+        }
+
+        impl From<&Box<$struct_name>> for Box<$struct_name> {
+            fn from(value: &Box<$struct_name>) -> Box<$struct_name> { (*value).clone() }
         }
 
         impl<'de> serde::de::Deserialize<'de> for Box<$struct_name> {
@@ -1576,9 +1576,7 @@ macro_rules! TelegramStringId {
         impl std::ops::Deref for $struct_name {
             type Target = str;
 
-            fn deref(&self) -> &Self::Target {
-                &self.0
-            }
+            fn deref(&self) -> &Self::Target { &self.0 }
         }
     };
 }
