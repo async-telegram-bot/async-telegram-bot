@@ -397,7 +397,7 @@ pub trait Requester {
     where
         C: Into<Recipient>,
         Q: Into<String>,
-        O: IntoIterator<Item = String>;
+        O: IntoIterator<Item = InputPollOption>;
 
     type SendDice: Request<Payload = SendDice, Err = Self::Err>;
 
@@ -702,7 +702,7 @@ pub trait Requester {
         &self,
         chat_id: C,
         name: N,
-        icon_color: u32,
+        icon_color: Rgb,
         icon_custom_emoji_id: I,
     ) -> Self::CreateForumTopic
     where

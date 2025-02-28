@@ -7,7 +7,9 @@ use crate::{
     types::{
         BotCommand, BusinessConnectionId, CallbackQueryId, ChatId, ChatPermissions,
         InlineQueryResult, InputFile, InputMedia, InputSticker, LabeledPrice, MessageId, Recipient,
-        StickerFormat, ThreadId, UserId,
+        BotCommand, BusinessConnectionId, CallbackQueryId, ChatId, ChatPermissions, 
+        InlineQueryResult, InputFile, InputMedia, InputPollOption, InputSticker, LabeledPrice, 
+        MessageId, Recipient, Rgb, StickerFormat, ThreadId, UserId,
     },
     Bot,
 };
@@ -283,7 +285,7 @@ impl Requester for Bot {
     where
         C: Into<Recipient>,
         Q: Into<String>,
-        O: IntoIterator<Item = String>,
+        O: IntoIterator<Item = InputPollOption>,
     {
         Self::SendPoll::new(self.clone(), payloads::SendPoll::new(chat_id, question, options))
     }
@@ -686,7 +688,7 @@ impl Requester for Bot {
         &self,
         chat_id: C,
         name: N,
-        icon_color: u32,
+        icon_color: Rgb,
         icon_custom_emoji_id: I,
     ) -> Self::CreateForumTopic
     where

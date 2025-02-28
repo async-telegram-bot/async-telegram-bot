@@ -3,6 +3,8 @@
 pub use allowed_update::*;
 pub use animation::*;
 pub use audio::*;
+pub use background_fill::*;
+pub use background_type::*;
 pub use birthdate::*;
 pub use bot_command::*;
 pub use bot_command_scope::*;
@@ -21,6 +23,7 @@ pub use callback_query::*;
 pub use chat::*;
 pub use chat_action::*;
 pub use chat_administrator_rights::*;
+pub use chat_background::*;
 pub use chat_boost::*;
 pub use chat_boost_added::*;
 pub use chat_boost_removed::*;
@@ -88,6 +91,7 @@ pub use inline_query_results_button::*;
 pub use input_file::*;
 pub use input_media::*;
 pub use input_message_content::*;
+pub use input_poll_option::*;
 pub use input_sticker::*;
 pub use invoice::*;
 pub use keyboard_button::*;
@@ -96,6 +100,7 @@ pub use keyboard_button_request_chat::*;
 pub use keyboard_button_request_users::*;
 pub use label_price::*;
 pub use link_preview_options::*;
+pub use live_period::*;
 pub use location::*;
 pub use login_url::*;
 pub use mask_position::*;
@@ -115,6 +120,7 @@ pub use parse_mode::*;
 pub use passport_data::*;
 pub use passport_element_error::*;
 pub use passport_file::*;
+pub use percentage::*;
 pub use photo_size::*;
 pub use poll::*;
 pub use poll_answer::*;
@@ -128,6 +134,7 @@ pub use reply_markup::*;
 pub use reply_parameters::*;
 pub use request_id::*;
 pub use response_parameters::*;
+pub use rgb::*;
 pub use sent_web_app_message::*;
 pub use shared_user::*;
 pub use shipping_address::*;
@@ -165,6 +172,8 @@ pub use write_access_allowed::*;
 mod allowed_update;
 mod animation;
 mod audio;
+mod background_fill;
+mod background_type;
 mod birthdate;
 mod bot_command;
 mod bot_command_scope;
@@ -183,6 +192,7 @@ mod callback_query;
 mod chat;
 mod chat_action;
 mod chat_administrator_rights;
+mod chat_background;
 mod chat_boost;
 mod chat_boost_removed;
 mod chat_boost_source;
@@ -225,6 +235,7 @@ mod inline_query_results_button;
 mod input_file;
 mod input_media;
 mod input_message_content;
+mod input_poll_option;
 mod input_sticker;
 mod invoice;
 mod keyboard_button;
@@ -233,6 +244,7 @@ mod keyboard_button_request_chat;
 mod keyboard_button_request_users;
 mod label_price;
 mod link_preview_options;
+mod live_period;
 mod location;
 mod login_url;
 mod mask_position;
@@ -249,6 +261,7 @@ mod message_reaction_count_updated;
 mod message_reaction_updated;
 mod order_info;
 mod parse_mode;
+mod percentage;
 mod photo_size;
 mod poll;
 mod poll_answer;
@@ -262,6 +275,7 @@ mod reply_markup;
 mod reply_parameters;
 mod request_id;
 mod response_parameters;
+mod rgb;
 mod sent_web_app_message;
 mod shared_user;
 mod shipping_address;
@@ -545,66 +559,34 @@ pub(crate) mod option_msg_id_as_int {
     }
 }
 
-pub(crate) mod serde_rgb {
-    use serde::{de::Visitor, Deserializer, Serializer};
+pub(crate) mod vec_msg_id_as_vec_int {
+    use crate::types::MessageId;
 
-    pub fn serialize<S: Serializer>(&this: &[u8; 3], s: S) -> Result<S::Ok, S::Error> {
-        s.serialize_u32(to_u32(this))
-    }
+    use serde::{ser::SerializeSeq, Serializer};
 
-    pub fn deserialize<'de, D: Deserializer<'de>>(d: D) -> Result<[u8; 3], D::Error> {
-        struct V;
-
-        impl Visitor<'_> for V {
-            type Value = [u8; 3];
-
-            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-                formatter.write_str("an integer represeting an RGB color")
-            }
-
-            fn visit_u32<E>(self, v: u32) -> Result<Self::Value, E>
-            where
-                E: serde::de::Error,
-            {
-                Ok(from_u32(v))
-            }
-
-            fn visit_u64<E>(self, v: u64) -> Result<Self::Value, E>
-            where
-                E: serde::de::Error,
-            {
-                self.visit_u32(v.try_into().map_err(|_| E::custom("rgb value doesn't fit u32"))?)
-            }
+    pub(crate) fn serialize<S>(msg_ids: &Vec<MessageId>, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut seq = serializer.serialize_seq(Some(msg_ids.len()))?;
+        for e in msg_ids {
+            seq.serialize_element(&e.0)?;
         }
-        d.deserialize_u32(V)
-    }
-
-    fn to_u32([r, g, b]: [u8; 3]) -> u32 {
-        u32::from_be_bytes([0, r, g, b])
-    }
-
-    fn from_u32(rgb: u32) -> [u8; 3] {
-        let [_, r, g, b] = rgb.to_be_bytes();
-        [r, g, b]
+        seq.end()
     }
 
     #[test]
-    fn bytes() {
-        assert_eq!(to_u32([0xAA, 0xBB, 0xCC]), 0x00AABBCC);
-        assert_eq!(from_u32(0x00AABBCC), [0xAA, 0xBB, 0xCC]);
-    }
-
-    #[test]
-    fn json() {
-        #[derive(Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+    fn test() {
+        #[derive(serde::Serialize)]
         struct Struct {
-            #[serde(with = "self")]
-            color: [u8; 3],
+            #[serde(with = "crate::types::vec_msg_id_as_vec_int")]
+            msg_ids: Vec<MessageId>,
         }
 
-        let json = format!(r#"{{"color":{}}}"#, 0x00AABBCC);
-        let Struct { color } = serde_json::from_str(&json).unwrap();
-
-        assert_eq!(color, [0xAA, 0xBB, 0xCC])
+        {
+            let s = Struct { msg_ids: vec![MessageId(1), MessageId(2)] };
+            let json = serde_json::to_string(&s).unwrap();
+            assert_eq!(json, "{\"msg_ids\":[1,2]}");
+        }
     }
 }

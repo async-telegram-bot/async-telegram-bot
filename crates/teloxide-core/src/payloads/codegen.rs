@@ -27,8 +27,8 @@ fn codegen_payloads() {
         let uses = uses(&method);
 
         let method_doc = render_doc(&method.doc, method.sibling.as_deref());
-        let eq_hash_derive = eq_hash_suitable(&method).then(|| " Eq, Hash,").unwrap_or("");
-        let default_derive = default_needed(&method).then(|| " Default,").unwrap_or("");
+        let eq_hash_derive = if eq_hash_suitable(&method) { " Eq, Hash," } else { "" };
+        let default_derive = if default_needed(&method) { " Default," } else { "" };
 
         let return_ty = method.return_ty.to_string();
 
@@ -225,6 +225,9 @@ fn params(params: impl Iterator<Item = impl Borrow<Param>>) -> String {
                     if s == "MessageId" || s == "TargetMessage" || s == "StickerType" =>
                 {
                     "\n            #[serde(flatten)]"
+                }
+                Type::ArrayOf(b) if **b == Type::RawTy("MessageId".to_string()) => {
+                    "\n            #[serde(with = \"crate::types::vec_msg_id_as_vec_int\")]"
                 }
                 _ => "",
             };

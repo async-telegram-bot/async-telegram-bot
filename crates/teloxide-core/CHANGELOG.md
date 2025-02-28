@@ -42,6 +42,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Add `BusinessMessagesDeleted` struct
   - Add `BusinessConnection`, `BusinessMessage`, `EditedBusinessMessage` and `DeletedBusinessMessages` variants to `UpdateKind` enum
 
+- `ApiError::BotKickedFromChannel` ([#1157][pr1157])
+- `sender_boost_count` method to the `Message` struct ([#1264][pr1264])
+- `From<&Message> for MessageId` impl ([#1271][pr1271])
+- `protect_content` parameter to the `sendVoice` method ([#1265][pr1265])
+
+- Support for TBA 7.3 ([#1159](pr1159))
+  - Add `via_join_request` field to `ChatMemberUpdated` struct
+  - Add `LivePeriod` enum and replace `u32` with it in all `live_period` fields
+  - Add `live_period` parameter to `editMessageLiveLocation` method
+  - Add `question_entities` field to `Poll` struct
+  - Add `text_entities` filed to `PollOption` struct
+  - Add `question_parse_mode` and `question_entities` parameters to `sendPoll` method
+  - Add `InputPollOption` struct
+  - Add `Percentage` struct
+  - Add `BackgroundFill` and `BackgroundType` enum
+  - Add `ChatBackground` variant to `MessageKind` enum
+  - Add `max_reaction_count` field to `ChatFullInfo` struct
+  - Add `is_group_chat` syntax sugar for `ChatFullInfo` struct
+  - Document that .MP3 and .M4A files can be used as voice messages
+
+[pr1157]: https://github.com/teloxide/teloxide/pull/1157
+[pr1264]: https://github.com/teloxide/teloxide/pull/1264
+[pr1271]: https://github.com/teloxide/teloxide/pull/1271
+[pr1265]: https://github.com/teloxide/teloxide/pull/1265
+
 ### Changed
 
 - `MaybeAnonymousUser` type introduced, which replaced `PollAnswer::voter: Voter` and `MessageReactionUpdated::{user, actor_chat}` in `MessageReactionUpdated`([#1134][pr1134])
@@ -49,6 +74,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - MSRV (Minimal Supported Rust Version) was bumped from `1.70.0` to `1.80.0`
   - Some dependencies was bumped: `reqwest` to `0.12.7` and `ron` to `0.8.1`
   - `tokio` version was explicitly specified as `1.39` and feature `io-util` was enabled for it
+- `[u8; 3]` sometimes used for RGB values was replaced with dedicated `Rgb` struct: ([#1151][pr1151])
+  - `serde_rgb` module from `types.rs` file was removed
+  - `CreateForumTopic`, `ForumTopicCreated` and `ForumTopic` structs now use `Rgb` instead of `[u8; 3]` for `icon_color` field
+  - Added `rgb` crate dependency to Cargo.toml
+  - Added `Rgb` struct with `From` implementation for `RGB8` type from popular `rgb` crate
 
 - Support for TBA 7.2 ([#1146](pr1146))
   - Remove `flags` field from `StickerSet` struct
@@ -56,14 +86,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Wrap `Public` variant of `ChatKind` in `Box`
   - Replaced `user_ids` with `users` in `UsersShared` struct
 
+- Remove a useless generic type in the `KeyboardMarkup::selective` function ([#1176][pr1176])
+
+- Support for TBA 7.3 ([#1159](pr1159))
+  - Change `options` parameter type in method `sendPoll` to `InputPollOption`
+  - Move most of the fields and methods from `Chat` to `ChatFullInfo` struct
+  - Return `ChatFullInfo` struct from `getChat` method instead of `Chat`
+
 [pr1131]: https://github.com/teloxide/teloxide/pull/1131
 [pr1134]: https://github.com/teloxide/teloxide/pull/1134
 [pr1146]: https://github.com/teloxide/teloxide/pull/1146
 [pr1147]: https://github.com/teloxide/teloxide/pull/1147
+[pr1151]: https://github.com/teloxide/teloxide/pull/1151
+[pr1176]: https://github.com/teloxide/teloxide/pull/1176
 
 ### Removed
 
 - `Currency` enum removed, its usages replaced with `String`.
+
+- Support for TBA 7.3 ([#1159](pr1159))
+  - Remove some degraded functionality (because of `Chat` to `ChatFullInfo` migration):
+    - `fn mentioned_users` from `chat_member_updated.rs` lost ability to track chat users
+    - `fn mentioned_users` from `chat_join_request.rs` was removed completely
+    - `fn mentioned_users` from `Message` lost ability to track chat users (e.g. from pins) and chat users from forward
+    - `fn mentioned_users_rec` was removed from `Chat` and not included in `ChatFullInfo` struct
+
+[pr1159]: https://github.com/teloxide/teloxide/pull/1159
 
 ## 0.10.1 - 2024-08-17
 
